@@ -1,0 +1,16 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  font-family: sans-serif;
+}
+
+.sidebar {
+  width: 30%;
+  border-right: 1px solid #ccc;
+  padding: 1rem;
+}
+
+.detail {
+  flex: 1;
+  padding: 1.5rem;
+}

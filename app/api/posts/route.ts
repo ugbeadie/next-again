@@ -11,7 +11,7 @@ export async function GET() {
   } catch (error: any) {
     return NextResponse.json(
       { error: "Failed to fetch posts", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -23,10 +23,10 @@ export async function POST(req: Request) {
     if (!title || !content) {
       return NextResponse.json(
         { error: "Title and content are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
+    //TODO: Add validation for title and content length
     await connectDB();
     const newPost = await Post.create({ title, content });
 
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     return NextResponse.json(
       { error: "Failed to create post", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -51,7 +51,7 @@ export async function PUT(req: Request) {
     const updatedPost = await Post.findByIdAndUpdate(
       id,
       { title, content },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedPost) {
@@ -62,7 +62,7 @@ export async function PUT(req: Request) {
   } catch (error: any) {
     return NextResponse.json(
       { error: "Failed to update post", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -86,7 +86,7 @@ export async function DELETE(req: Request) {
   } catch (error: any) {
     return NextResponse.json(
       { error: "Failed to delete post", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

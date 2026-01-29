@@ -69,25 +69,16 @@ export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
 
   const fetchPosts = async () => {
-    const res = await fetch("/api/posts", { cache: "no-store" });
+    const res = await fetch("/api/posts", {
+      cache: "no-store",
+    });
     const data = await res.json();
     setPosts(data);
   };
 
-  const listenForUpdates = async () => {
-    const res = await fetch("/api/revalidate", { method: "POST" });
-    if (res.ok) {
-      fetchPosts();
-    }
-  };
-
   useEffect(() => {
     fetchPosts();
-
-    const interval = setInterval(() => {
-      listenForUpdates();
-    }, 3000); // checks every 3s
-
+    const interval = setInterval(fetchPosts, 3000);
     return () => clearInterval(interval);
   }, []);
 

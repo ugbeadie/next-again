@@ -9,13 +9,11 @@ export default function Dashboard() {
   const [content, setContent] = useState("");
 
   const fetchPosts = async () => {
-    const res = await fetch("/api/posts");
+    const res = await fetch("/api/posts", {
+      cache: "no-store",
+    });
     const data = await res.json();
     setPosts(data);
-  };
-
-  const triggerRefresh = async () => {
-    await fetch("/api/revalidate", { method: "POST" });
   };
 
   useEffect(() => {
@@ -31,14 +29,12 @@ export default function Dashboard() {
 
     setTitle("");
     setContent("");
-    await triggerRefresh();
-    fetchPosts();
+    fetchPosts(); // immediate refresh
   };
 
   const updatePost = async (id: string) => {
     const newTitle = prompt("New title?");
     const newContent = prompt("New content?");
-
     if (!newTitle || !newContent) return;
 
     await fetch("/api/posts", {
@@ -47,7 +43,6 @@ export default function Dashboard() {
       body: JSON.stringify({ id, title: newTitle, content: newContent }),
     });
 
-    await triggerRefresh();
     fetchPosts();
   };
 
@@ -58,7 +53,6 @@ export default function Dashboard() {
       body: JSON.stringify({ id }),
     });
 
-    await triggerRefresh();
     fetchPosts();
   };
 
@@ -72,12 +66,14 @@ export default function Dashboard() {
         onChange={(e) => setTitle(e.target.value)}
       />
       <br />
+
       <textarea
         placeholder="Content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
       <br />
+
       <button onClick={createPost}>Create Post</button>
 
       <hr />

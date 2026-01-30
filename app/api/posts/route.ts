@@ -26,7 +26,6 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    //TODO: Add validation for title and content length
     await connectDB();
     const newPost = await Post.create({ title, content });
 

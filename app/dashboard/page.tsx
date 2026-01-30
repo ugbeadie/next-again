@@ -29,7 +29,7 @@ export default function Dashboard() {
 
     setTitle("");
     setContent("");
-    fetchPosts(); // immediate refresh
+    fetchPosts();
   };
 
   const updatePost = async (id: string) => {

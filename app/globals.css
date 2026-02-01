@@ -1,4 +1,6 @@
-.layout {
+@import "tailwindcss";
+
+/* .layout {
   display: flex;
   height: 100vh;
   font-family: sans-serif;
@@ -13,4 +15,4 @@
 .detail {
   flex: 1;
   padding: 1.5rem;
-}
+} */

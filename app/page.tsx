@@ -59,7 +59,6 @@
 //     </main>
 //   );
 // }
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -67,34 +66,58 @@ import { Post } from "../types/post";
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchPosts = async () => {
-    const res = await fetch("/api/posts", {
-      cache: "no-store",
-    });
-    const data = await res.json();
-    setPosts(data);
+    try {
+      const res = await fetch("/api/posts", { cache: "no-store" });
+      const data = await res.json();
+      setPosts(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchPosts();
-    const interval = setInterval(fetchPosts, 3000);
+    const interval = setInterval(fetchPosts, 1500);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <main style={{ padding: 20 }}>
-      <h1>Public Site</h1>
+    <main className="max-w-3xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-semibold mb-6">Website(User Only)</h1>
 
-      {posts.map((post) => (
-        <div
-          key={post._id}
-          style={{ border: "1px solid #ccc", margin: 10, padding: 10 }}
-        >
-          <h3>{post.title}</h3>
-          <p>{post.content}</p>
+      {loading && (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="animate-pulse rounded-lg border p-4 space-y-3"
+            >
+              <div className="h-4 bg-gray-200 rounded w-1/3" />
+              <div className="h-3 bg-gray-200 rounded w-full" />
+              <div className="h-3 bg-gray-200 rounded w-5/6" />
+            </div>
+          ))}
         </div>
-      ))}
+      )}
+
+      {!loading && posts.length === 0 && (
+        <p className="text-sm text-gray-500">No posts yet.</p>
+      )}
+
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <div
+            key={post._id}
+            className="rounded-lg border bg-white p-4 shadow-sm"
+          >
+            <h3 className="font-semibold text-lg">{post.title}</h3>
+            <p className="text-gray-700 mt-1">{post.content}</p>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

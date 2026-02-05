@@ -88,21 +88,6 @@ export default function Home() {
     <main className="max-w-3xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-semibold mb-6">Website(User Only)</h1>
 
-      {loading && (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-lg border p-4 space-y-3"
-            >
-              <div className="h-4 bg-gray-200 rounded w-1/3" />
-              <div className="h-3 bg-gray-200 rounded w-full" />
-              <div className="h-3 bg-gray-200 rounded w-5/6" />
-            </div>
-          ))}
-        </div>
-      )}
-
       {!loading && posts.length === 0 && (
         <p className="text-sm text-gray-500">No posts yet.</p>
       )}

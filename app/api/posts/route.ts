@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
-import connectDB from "../../../lib/db";
-import Post from "../../../lib/models/post";
+import connectDB from "@/lib/db";
+import Post from "@/lib/models/post";
 import { Types } from "mongoose";
 
 export async function GET() {
   try {
     await connectDB();
+
     const posts = await Post.find().sort({ createdAt: -1 });
+
     return NextResponse.json(posts);
   } catch (error: any) {
+    console.error("GET /posts error:", error);
+
     return NextResponse.json(
-      { error: "Failed to fetch posts", details: error.message },
+      { error: "Failed to fetch posts" },
       { status: 500 },
     );
   }
@@ -18,7 +22,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { title, content } = await req.json();
+    const body = await req.json();
+    const { title, content } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -26,13 +31,20 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    await connectDB();
-    const newPost = await Post.create({ title, content });
 
-    return NextResponse.json(newPost, { status: 201 });
+    await connectDB();
+
+    const post = await Post.create({
+      title,
+      content,
+    });
+
+    return NextResponse.json(post, { status: 201 });
   } catch (error: any) {
+    console.error("POST /posts error:", error);
+
     return NextResponse.json(
-      { error: "Failed to create post", details: error.message },
+      { error: "Failed to create post" },
       { status: 500 },
     );
   }
@@ -47,20 +59,23 @@ export async function PUT(req: Request) {
     }
 
     await connectDB();
-    const updatedPost = await Post.findByIdAndUpdate(
+
+    const updated = await Post.findByIdAndUpdate(
       id,
       { title, content },
       { new: true },
     );
 
-    if (!updatedPost) {
+    if (!updated) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    return NextResponse.json(updatedPost);
+    return NextResponse.json(updated);
   } catch (error: any) {
+    console.error("PUT /posts error:", error);
+
     return NextResponse.json(
-      { error: "Failed to update post", details: error.message },
+      { error: "Failed to update post" },
       { status: 500 },
     );
   }
@@ -75,16 +90,19 @@ export async function DELETE(req: Request) {
     }
 
     await connectDB();
-    const deletedPost = await Post.findByIdAndDelete(id);
 
-    if (!deletedPost) {
+    const deleted = await Post.findByIdAndDelete(id);
+
+    if (!deleted) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ message: "Post deleted" });
+    return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error("DELETE /posts error:", error);
+
     return NextResponse.json(
-      { error: "Failed to delete post", details: error.message },
+      { error: "Failed to delete post" },
       { status: 500 },
     );
   }

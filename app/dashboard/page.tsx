@@ -65,7 +65,7 @@ export default function Dashboard() {
 
       const newPost: Post = await res.json();
 
-      // ✅ update UI immediately
+      // update UI immediately
       setPosts((prev) => [newPost, ...prev]);
 
       setTitle("");
@@ -110,7 +110,7 @@ export default function Dashboard() {
 
       const updated: Post = await res.json();
 
-      // ✅ update local list
+      // update local list
       setPosts((prev) =>
         prev.map((p) => (p._id === updated._id ? updated : p)),
       );
@@ -133,7 +133,7 @@ export default function Dashboard() {
       return;
     }
 
-    // ✅ update local list
+    // update local list
     setPosts((prev) => prev.filter((p) => p._id !== id));
   };
 

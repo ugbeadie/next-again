@@ -2,108 +2,97 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Post from "@/lib/models/post";
 import { Types } from "mongoose";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth";
+
+async function getUserId() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return null;
+
+  try {
+    const payload = verifyToken(token);
+    return payload.userId;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET() {
-  try {
-    await connectDB();
+  const userId = await getUserId();
 
-    const posts = await Post.find().sort({ createdAt: -1 });
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    return NextResponse.json(posts);
-  } catch (error: any) {
-    console.error("GET /posts error:", error);
+  await connectDB();
 
-    return NextResponse.json(
-      { error: "Failed to fetch posts" },
-      { status: 500 },
-    );
-  }
+  const posts = await Post.find({ userId }).sort({ createdAt: -1 });
+
+  return NextResponse.json(posts);
 }
 
 export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { title, content } = body;
+  const userId = await getUserId();
 
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: "Title and content are required" },
-        { status: 400 },
-      );
-    }
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await connectDB();
+  const { title, content } = await req.json();
 
-    const post = await Post.create({
-      title,
-      content,
-    });
+  await connectDB();
 
-    return NextResponse.json(post, { status: 201 });
-  } catch (error: any) {
-    console.error("POST /posts error:", error);
+  const post = await Post.create({
+    title,
+    content,
+    userId,
+  });
 
-    return NextResponse.json(
-      { error: "Failed to create post" },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json(post, { status: 201 });
 }
 
 export async function PUT(req: Request) {
-  try {
-    const { id, title, content } = await req.json();
+  const userId = await getUserId();
 
-    if (!id || !Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid post id" }, { status: 400 });
-    }
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await connectDB();
+  const { id, title, content } = await req.json();
 
-    const updated = await Post.findByIdAndUpdate(
-      id,
-      { title, content },
-      { new: true },
-    );
-
-    if (!updated) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(updated);
-  } catch (error: any) {
-    console.error("PUT /posts error:", error);
-
-    return NextResponse.json(
-      { error: "Failed to update post" },
-      { status: 500 },
-    );
+  if (!Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
+
+  await connectDB();
+
+  const post = await Post.findOneAndUpdate(
+    { _id: id, userId },
+    { title, content },
+    { new: true },
+  );
+
+  if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  return NextResponse.json(post);
 }
 
 export async function DELETE(req: Request) {
-  try {
-    const { id } = await req.json();
+  const userId = await getUserId();
 
-    if (!id || !Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid post id" }, { status: 400 });
-    }
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await connectDB();
+  const { id } = await req.json();
 
-    const deleted = await Post.findByIdAndDelete(id);
+  await connectDB();
 
-    if (!deleted) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    }
+  const deleted = await Post.findOneAndDelete({
+    _id: id,
+    userId,
+  });
 
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error("DELETE /posts error:", error);
+  if (!deleted)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    return NextResponse.json(
-      { error: "Failed to delete post" },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json({ success: true });
 }

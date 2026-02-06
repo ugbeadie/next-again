@@ -16,6 +16,16 @@ export default function Dashboard() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
+  const [email, setEmail] = useState<string | null>(null);
+
+  const fetchMe = async () => {
+    const res = await fetch("/api/me");
+    if (res.ok) {
+      const data = await res.json();
+      setEmail(data.email);
+    }
+  };
+
   const fetchPosts = async () => {
     const res = await fetch("/api/posts", { cache: "no-store" });
 
@@ -30,6 +40,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    fetchMe();
     fetchPosts();
   }, []);
 
@@ -126,9 +137,25 @@ export default function Dashboard() {
     setPosts((prev) => prev.filter((p) => p._id !== id));
   };
 
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  };
+
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold mb-6">Dashboard (Admin Only)</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Dashboard</h1>
+          {email && (
+            <p className="text-sm text-gray-500">Logged in as {email}</p>
+          )}
+        </div>
+
+        <button onClick={logout} className="text-sm border px-3 py-1 rounded">
+          Logout
+        </button>
+      </div>
 
       <div className="rounded-lg border bg-white p-4 mb-8 space-y-3">
         <h2 className="font-medium">Create post</h2>

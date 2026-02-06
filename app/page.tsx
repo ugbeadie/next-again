@@ -70,9 +70,20 @@ export default function Home() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch("/api/posts", { cache: "no-store" });
+      const res = await fetch("/api/public-posts", { cache: "no-store" });
+
+      if (!res.ok) {
+        setPosts([]); // important
+        return;
+      }
+
       const data = await res.json();
-      setPosts(data);
+
+      if (Array.isArray(data)) {
+        setPosts(data);
+      } else {
+        setPosts([]);
+      }
     } finally {
       setLoading(false);
     }

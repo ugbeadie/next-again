@@ -13,9 +13,7 @@ export async function GET() {
 
   try {
     const payload = verifyToken(token);
-
     await connectDB();
-
     const user = await User.findById(payload.userId).select("email");
 
     if (!user)

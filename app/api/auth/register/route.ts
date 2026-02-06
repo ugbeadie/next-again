@@ -5,7 +5,6 @@ import User from "@/lib/models/users";
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
-
   if (!email || !password) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }

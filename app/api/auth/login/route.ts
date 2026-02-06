@@ -10,13 +10,11 @@ export async function POST(req: Request) {
   await connectDB();
 
   const user = await User.findOne({ email });
-
   if (!user) {
     return NextResponse.json({ error: "Invalid login" }, { status: 401 });
   }
 
   const ok = await bcrypt.compare(password, user.password);
-
   if (!ok) {
     return NextResponse.json({ error: "Invalid login" }, { status: 401 });
   }
@@ -24,11 +22,9 @@ export async function POST(req: Request) {
   const token = signToken({ userId: user._id.toString() });
 
   const res = NextResponse.json({ success: true });
-
   res.cookies.set("token", token, {
     httpOnly: true,
     path: "/",
   });
-
   return res;
 }

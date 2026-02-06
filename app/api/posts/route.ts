@@ -21,20 +21,16 @@ async function getUserId() {
 
 export async function GET() {
   const userId = await getUserId();
-
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectDB();
-
   const posts = await Post.find({ userId }).sort({ createdAt: -1 });
-
   return NextResponse.json(posts);
 }
 
 export async function POST(req: Request) {
   const userId = await getUserId();
-
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -53,12 +49,10 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   const userId = await getUserId();
-
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id, title, content } = await req.json();
-
   if (!Types.ObjectId.isValid(id)) {
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
@@ -72,20 +66,16 @@ export async function PUT(req: Request) {
   );
 
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
   return NextResponse.json(post);
 }
 
 export async function DELETE(req: Request) {
   const userId = await getUserId();
-
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await req.json();
-
   await connectDB();
-
   const deleted = await Post.findOneAndDelete({
     _id: id,
     userId,
